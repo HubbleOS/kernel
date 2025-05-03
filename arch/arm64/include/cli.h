@@ -10,7 +10,7 @@ extern void _terminate(void);
 #define ARROW_DOWN "\x1b[B"
 #define ARROW_LEFT "\x1b[D"
 #define ARROW_RIGHT "\x1b[C"
-#define ENTER "\x1b[1;5A
+#define ENTER "\x1b[1;5A"
 
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
@@ -52,8 +52,6 @@ void read_line(char *buf, int max_len)
 	while (i < max_len - 1)
 	{
 		char c = getchar();
-		putchar(c);
-		print(c);
 
 		if (c == END_OF_TRANSMISSION)
 		{
@@ -145,7 +143,7 @@ void clearConsole(void)
 
 void cli(void)
 {
-	clearConsole();
+	// clearConsole();
 	neofetch();
 
 	while (1)
