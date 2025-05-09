@@ -1,6 +1,6 @@
 # Cross-compiler prefix
-CROSS = aarch64-unknown-linux-gnu-
-# CROSS = aarch64-elf-
+# CROSS = aarch64-unknown-linux-gnu-
+CROSS = aarch64-elf-
 
 # Tools
 AS = $(CROSS)as
