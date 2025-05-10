@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 
 # Environment
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive 
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,7 +32,7 @@ WORKDIR /src
 # Download
 RUN curl -LO https://ftp.gnu.org/gnu/binutils/binutils-2.41.tar.xz && \
 	curl -LO https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz && \
-	curl -LO https://ftp.gnu.org/gnu/gdb/gdb-13.2.tar.xz && 
+	curl -LO https://ftp.gnu.org/gnu/gdb/gdb-13.2.tar.xz
 
 # Extract
 RUN	tar -xf binutils-2.41.tar.xz && \

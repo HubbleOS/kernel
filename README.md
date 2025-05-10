@@ -1,7 +1,7 @@
 # kernel
 
 ```bash
-docker-compose build osdev-x86
+docker-compose build x86-builder
 docker-compose run --rm osdev-x86
 ```
 
