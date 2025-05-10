@@ -1,24 +1,24 @@
 services:
-  osdev-x86:
-    platform: linux/amd64
+  x86-builder:
+    platform: linux/amd64 
     build:
-      context: ./docker/arch/x86
-      args:
-        TARGET_ARCH: i686
+      context: .
+      dockerfile: arch/x86/Dockerfile
     volumes:
-      - .:/src
-    working_dir: /src
-    stdin_open: true
-    tty: true
+      - ./output/x86:/opt/cross
+    environment:
+      - TARGET=i686-elf
+      - PREFIX=/opt/cross
+    container_name: x86-cross
 
-  osdev-arm64:
+  arm64-builder:
     platform: linux/arm64
     build:
-      context: ./docker/arch/arm64
-      args:
-        TARGET_ARCH: aarch64
+      context: .
+      dockerfile: arch/arm64/Dockerfile
     volumes:
-      - .:/src
-    working_dir: /src
-    stdin_open: true
-    tty: true
+      - ./output/arm64:/opt/cross
+    environment:
+      - TARGET=arm-none-eabi
+      - PREFIX=/opt/cross
+    container_name: arm64-cross
