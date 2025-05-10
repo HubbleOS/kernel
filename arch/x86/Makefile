@@ -70,8 +70,8 @@ $(ISO_IMAGE): $(OUTPUT) $(GRUB_CFG)
 	mkdir -p $(ISO_GRUB)
 	cp $(OUTPUT) $(ISO_KERNEL)
 	cp $(GRUB_CFG) $(ISO_GRUB)/grub.cfg
-	i686-elf-grub-mkrescue -o $(ISO_IMAGE) $(ISO_DIR)
-	# grub-mkrescue -o $(ISO_IMAGE) $(ISO_DIR)
+	# i686-elf-grub-mkrescue -o $(ISO_IMAGE) $(ISO_DIR)
+	grub-mkrescue -o $(ISO_IMAGE) $(ISO_DIR)
 
 
 # Run in QEMU

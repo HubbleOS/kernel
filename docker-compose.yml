@@ -1,0 +1,24 @@
+services:
+  osdev-x86:
+    platform: linux/amd64
+    build:
+      context: ./docker/arch/x86
+      args:
+        TARGET_ARCH: i686
+    volumes:
+      - .:/src
+    working_dir: /src
+    stdin_open: true
+    tty: true
+
+  osdev-arm64:
+    platform: linux/arm64
+    build:
+      context: ./docker/arch/arm64
+      args:
+        TARGET_ARCH: aarch64
+    volumes:
+      - .:/src
+    working_dir: /src
+    stdin_open: true
+    tty: true
