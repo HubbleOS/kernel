@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: arch/x86/Dockerfile
     volumes:
-      - ./output/x86:/opt/cross
+      - ./arch/x86:/kernel/arch/x86
     environment:
       - TARGET=i686-elf
       - PREFIX=/opt/cross
@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: arch/arm64/Dockerfile
     volumes:
-      - ./output/arm64:/opt/cross
+      - ./arch/arm64:/kernel/arch/arm64
     environment:
       - TARGET=arm-none-eabi
       - PREFIX=/opt/cross

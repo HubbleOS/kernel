@@ -2,10 +2,6 @@
 
 ```bash
 docker-compose build x86-builder
-docker-compose run --rm osdev-x86
+╰─ docker-compose run --rm x86-builder bash            
 ```
 
-```bash
-docker-compose build osdev-arm64
-docker-compose run --rm osdev-arm64
-```
