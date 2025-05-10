@@ -5,14 +5,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define ESCAPE 0x1b
-
-#define ARROW_UP "\x1b[A"
-#define ARROW_DOWN "\x1b[B"
-#define ARROW_LEFT "\x1b[D"
-#define ARROW_RIGHT "\x1b[C"
-#define ENTER "\x1b[1;5A"
-
 
 
 
@@ -68,9 +60,6 @@ uint8_t color_to_vga(enum Color color) {
 
 
 
-
-
-
 #define VGA_WIDTH   80
 #define VGA_HEIGHT  25
 #define VGA_MEMORY  0xB8000 
@@ -118,49 +107,15 @@ void print(const char* data)
 	terminal_write(data, strlen(data));
 }
 
-// void print(const char *s)
-// {
-// 	while (*s != '\0')
-// 		putchar(*s++);
-// }
-
-
-
-
-
-// char getchar(void)
-// {
-// 	// Ждем, пока UART не станет готов к чтению
-// 	while (*(volatile uint32_t *)0x09000018 & (1 << 4))
-// 		; // Bit 4 == RXFE (Receive FIFO Empty)
-// 	return UART_DR;
-// }
-
-static inline uint8_t inb(uint16_t port) {
-	uint8_t result;
-	__asm__ volatile ("inb %1, %0" : "=a"(result) : "Nd"(port));
-	return result;
-}
+static inline uint8_t inb(uint16_t port);
 
 char scancode_to_ascii(uint8_t scancode);
 
 char getchar(void);
 
-
-#define END_OF_TEXT 0x03		 // CTRL+C
-#define END_OF_TRANSMISSION 0x04 // CTRL+D
-
 void read_line(char *buf, int max_len);
 
-int strcmp(const char *s1, const char *s2)
-{
-	while (*s1 && (*s1 == *s2))
-	{
-		s1++;
-		s2++;
-	}
-	return *(const unsigned char *)s1 - *(const unsigned char *)s2;
-}
+int strcmp(const char *s1, const char *s2);
 
 void terminal_initialize(void) ;
 
@@ -226,11 +181,7 @@ void clearConsole(void)
 
 void cli(void)
 {
-	// clearConsole();
 	neofetch();
-	
-	print("Hello, World!\n");
-
 	
 
 	while (1)
@@ -431,4 +382,18 @@ void scroll_terminal_up() {
         terminal_row--;
     terminal_column = 0;
     move_cursor(terminal_row, terminal_column);
+}
+int strcmp(const char *s1, const char *s2)
+{
+	while (*s1 && (*s1 == *s2))
+	{
+		s1++;
+		s2++;
+	}
+	return *(const unsigned char *)s1 - *(const unsigned char *)s2;
+}
+static inline uint8_t inb(uint16_t port) {
+	uint8_t result;
+	__asm__ volatile ("inb %1, %0" : "=a"(result) : "Nd"(port));
+	return result;
 }
