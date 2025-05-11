@@ -5,11 +5,12 @@ services:
       context: .
       dockerfile: arch/x86/Dockerfile
     volumes:
-      - ./arch/x86:/kernel/arch/x86
+      - .:/kernel
     environment:
       - TARGET=i686-elf
       - PREFIX=/opt/cross
     container_name: x86-cross
+    working_dir: /kernel
 
   arm64-builder:
     platform: linux/arm64
@@ -17,8 +18,9 @@ services:
       context: .
       dockerfile: arch/arm64/Dockerfile
     volumes:
-      - ./arch/arm64:/kernel/arch/arm64
+      - .:/kernel
     environment:
       - TARGET=arm-none-eabi
       - PREFIX=/opt/cross
     container_name: arm64-cross
+    working_dir: /kernel
