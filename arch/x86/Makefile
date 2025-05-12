@@ -1,5 +1,5 @@
 # Cross-compiler prefix
-CROSS = i686-elf-
+CROSS = x86_64-elf-
 
 # Tools
 AS = $(CROSS)as
