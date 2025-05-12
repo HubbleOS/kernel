@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Preparation
-ENV TARGET=i686-elf
+ENV TARGET=x86_64-elf
 ENV PREFIX=/opt/cross
 ENV PATH=$PREFIX/bin:$PATH
 

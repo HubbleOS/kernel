@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/kernel
     environment:
-      - TARGET=i686-elf
+      - TARGET=x86_64-elf
       - PREFIX=/opt/cross
     container_name: x86-cross
     working_dir: /kernel
