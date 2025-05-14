@@ -1,6 +1,13 @@
+.DS_Store
+
 *.elf
 *.bin
 *.iso
 *.o
 *.EFI
 *.img
+bin/
+build/
+dist/
+
+test/
