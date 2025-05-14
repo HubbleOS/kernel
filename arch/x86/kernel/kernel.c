@@ -1,5 +1,5 @@
-#include "framebuffer.h"
-#include "font.h"
+#include "utils/framebuffer.h"
+#include "utils/font.h"
 #include "cli.h"
 
 void kernel_main(framebuffer_info_t *fb)

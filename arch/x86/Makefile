@@ -1,14 +1,56 @@
-run: boot.o boot.so boot.efi
-	make clean
+# Cross compiler
+CROSS = x86_64-elf-
 
-boot.o:
-	gcc -Iinclude -I gnu-efi/inc -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args -c boot.c -o boot.o
+# Tools
+AS = $(CROSS)as
+CC = $(CROSS)gcc
+LD = $(CROSS)ld
+OBJCOPY = $(CROSS)objcopy
 
-boot.so:
-	ld -shared -Bsymbolic -L gnu-efi/x86_64/lib -L gnu-efi/x86_64/gnuefi -T gnu-efi/gnuefi/elf_x86_64_efi.lds gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o boot.o -o boot.so -lgnuefi -lefi
+# Flags
+CFLAGS = -ffreestanding -m64 -O2 -Wall -Wextra -c
+LDFLAGS = -nostdlib -T kernel/linker.ld # !!!!!!!!!!!!!!
 
-boot.efi:
-	objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 boot.so iso/EFI/BOOT/BOOTx64.EFI
+INCLUDES := -Iinclude
 
+# Directories
+SRC_DIRS = kernel
+BUILD_DIR = build
+
+# Source files
+SRC_FILES = $(shell find $(SRC_DIRS) -type f -name "*.c")
+OBJ_FILES = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
+
+# Output ELF
+OUTPUT = $(BUILD_DIR)/kernel.elf
+
+# Default target
+all: run
+
+run: $(OUTPUT)
+	@echo "Build successful."
+
+# Build object files
+build: $(OBJ_FILES)
+
+# Compile rule
+$(BUILD_DIR)/%.o: %.c
+	@echo "Compiling C: $< -> $@"
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+
+# Linking
+$(OUTPUT): $(OBJ_FILES)
+	@echo "Linking ELF: $@"
+	$(LD) $(LDFLAGS) $^ -o $@
+	$(LD) $(LDFLAGS) $(BUILD_DIR)/kernel.elf
+
+# Clean
 clean:
-	rm *.o *.so
+	@echo "Cleaning..."
+	@rm -rf $(BUILD_DIR)
+
+.PHONY: all run build clean
+
+# Bootloader
+

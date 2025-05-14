@@ -1,5 +1,5 @@
-#include "font.h"
-#include "framebuffer.h"
+#include "utils/font.h"
+#include "utils/framebuffer.h"
 #include <stdarg.h>
 
 uint8_t *get_glyph(char c)
