@@ -15,7 +15,8 @@ INCLUDES := -Iinclude
 
 # Directories
 SRC_DIRS = kernel
-BUILD_DIR = build
+# BUILD_DIR = build
+BUILD_DIR ?= build
 
 # Source files
 SRC_FILES = $(shell find $(SRC_DIRS) -type f -name "*.c")
