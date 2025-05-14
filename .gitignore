@@ -1,7 +1,5 @@
 bin/
 build/
+dist/
 
-*.elf
-*.bin
-*.iso
-*.o
+test/
