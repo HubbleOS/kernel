@@ -1,11 +1,11 @@
   # Збірка ядра
-  x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/kernel.c -o build/kernel.o
+x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/kernel.c -o build/kernel.o
 
   # Лінкування в ELF
-  x86_64-elf-ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.o
+x86_64-elf-ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.o
 
   # Витяг у flat binary
-  x86_64-elf-objcopy -O binary build/kernel.elf iso/kernel.bin
+x86_64-elf-objcopy -O binary build/kernel.elf iso/kernel.bin
 
 
 Збірка завантажувача

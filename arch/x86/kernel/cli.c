@@ -1,3 +1,4 @@
+#include "stdbool.h"
 #include "framebuffer.h"
 #include "font.h"
 
