@@ -1,6 +1,6 @@
 #include "stdbool.h"
-#include "framebuffer.h"
-#include "font.h"
+#include "utils/framebuffer.h"
+#include "utils/font.h"
 
 int bufer_history = 0;
 char key_history[128][128];
@@ -207,9 +207,8 @@ void clear(void)
 {
 	uint32_t *pixels = (uint32_t *)fbcli->base;
 	for (int i = 0; i < (fbcli->pitch / 4) * fbcli->height; ++i)
-	{
 		pixels[i] = 0x000000;
-	}
+
 	t_col = t_row = 0;
 }
 int atoi(const char *str)
@@ -327,16 +326,12 @@ void neofetch(void)
 {
 	t_color_char = COLOR_GREEN;
 	print(
-		"                \n"
-		"  _____                _              \n"
-		" / ____|              (_)             \n"
-		"| |       ___   _ __   _  _   _  _ __ ___\n"
-		"| |      / _ \\ | '_ \\ | || | | || '_ ` _ \\\n"
-		"| |____ | (_) || |_) || || |_| || | | | | |\n"
-		" \\_____| \\___/ | .__/ |_| \\__,_||_| |_| |_|\n"
-		"               | |                         \n"
-		"               |_|                         \n"
-		"\n");
+		" _    _         _      _      _        \n"
+		"| |  | |       | |    | |    | |       \n"
+		"| |__| | _   _ | |__  | |__  | |  ___  \n"
+		"|  __  || | | || '_ \ | '_ \ | | / _ \ \n"
+		"| |  | || |_| || |_) || |_) || ||  __/ \n"
+		"|_|  |_| \__,_||_.__/ |_.__/ |_| \___| \n");
 
 	t_color_char = COLOR_WHITE;
 }
