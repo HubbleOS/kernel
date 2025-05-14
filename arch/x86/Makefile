@@ -42,8 +42,8 @@ $(BUILD_DIR)/%.o: %.c
 # Linking
 $(OUTPUT): $(OBJ_FILES)
 	@echo "Linking ELF: $@"
-	$(LD) $(LDFLAGS) $^ -o $@
-	$(LD) $(LDFLAGS) $(BUILD_DIR)/kernel.elf
+# $(LD) $(LDFLAGS) $^ -o $@
+# $(LD) $(LDFLAGS) $(BUILD_DIR)/kernel.elf
 
 # Clean
 clean:

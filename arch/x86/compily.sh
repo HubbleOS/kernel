@@ -6,12 +6,15 @@ objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j
 
 rm *.o *.so
 
-x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/utils/font.c -o build/utils/font.o
-x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/kernel.c -o build/kernel.o
-x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/textout.c -o build/textout.o
-x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/cli.c -o build/cli.o
+# x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/utils/font.c -o build/utils/font.o
+# x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/kernel.c -o build/kernel.o
+# x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/textout.c -o build/textout.o
+# x86_64-elf-gcc -Iinclude -ffreestanding -m64 -O2 -Wall -c kernel/cli.c -o build/cli.o
 
-x86_64-elf-ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.o build/utils/font.o build/cli.o build/textout.o
+# x86_64-elf-ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel.o build/utils/font.o build/cli.o build/textout.o
+
+make
+x86_64-elf-ld -nostdlib -T kernel/linker.ld -o build/kernel.elf build/kernel/kernel.o build/kernel/utils/font.o build/kernel/cli.o build/kernel/textout.o
 
 # Витяг у flat binary
 x86_64-elf-objcopy -O binary build/kernel.elf iso/kernel.bin
