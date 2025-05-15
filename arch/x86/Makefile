@@ -47,7 +47,7 @@ EFI_SECTIONS := -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j
 # Default target
 all: run
 
-run: $(OUTPUT) bootloader
+run: $(OUTPUT) $(ISO) bootloader
 	@echo "Build successful."
 
 # Kernel object files
