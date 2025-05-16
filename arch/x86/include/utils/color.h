@@ -14,4 +14,10 @@ enum Color
 	COLOR_YELLOW = 0xFFFF00
 };
 
-color rgb(color r, color g, color b);
+inline color rgb(uint8_t r, uint8_t g, uint8_t b) { return ((color)r << 16) | ((color)g << 8) | b; }
+
+inline color rgba(uint8_t r, uint8_t g, uint8_t b, float a)
+{
+	uint8_t alpha = (uint8_t)(a * 255.0f + 0.5f);
+	return rgb(r, g, b) | ((color)alpha << 24);
+}
