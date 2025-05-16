@@ -301,7 +301,7 @@ void handle_neofetch()
 		"|  __  || | | || '_ \\ | '_ \\ | | / _ \\ \n"
 		"| |  | || |_| || |_) || |_) || ||  __/ \n"
 		"|_|  |_| \\__,_||_.__/ |_.__/ |_| \\___| \n",
-		rgb(162, 96, 212));
+		rgb(255, 150, 80));
 }
 
 void handle_help()
@@ -342,9 +342,7 @@ int cli(framebuffer_info_t *fb)
 	while (1)
 	{
 		t_col = 0;
-		t_color_char = COLOR_GREEN;
-		print("> ");
-		t_color_char = COLOR_WHITE;
+		print("> ", COLOR_GREEN);
 
 		read_line(key_history[bufer_history], 100);
 
@@ -411,6 +409,8 @@ void print_char(char c)
 	{
 		t_row++;
 		t_col = 0;
+		if (c == '\n')
+			return;
 	}
 	terminal_putentryat(c);
 	t_col++;
