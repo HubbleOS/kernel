@@ -47,7 +47,7 @@ EFI_SECTIONS := -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j
 # Default target
 all: run
 
-run: $(OUTPUT) $(ISO) bootloader
+run: $(OUTPUT) $(ISO) bootloader app
 	@echo "Build successful."
 
 # Kernel object files
@@ -92,4 +92,34 @@ clean:
 	@echo "Cleaning..."
 	@rm -rf $(BUILD_DIR) $(EFI_OUT)
 
-.PHONY: all run build clean bootloader
+
+
+# ==== App Build (C++) ====
+CXX = $(CROSS)g++
+
+APP_SRC := apps/app.cpp
+APP_OBJ := build/apps/app.o
+APP_ELF := iso/boot/app.elf
+APP_CFLAGS := -ffreestanding -nostdlib -O2 -Wall -Wextra
+APP_LDFLAGS := -nostdlib -T apps/app_linker.ld
+
+app: $(APP_ELF) $(APP_BIN)
+
+$(APP_OBJ): $(APP_SRC)
+	@echo "Compiling app.cpp to object: $<"
+	@mkdir -p $(dir $@)
+	$(CXX) $(APP_CFLAGS) -c $< -o $@
+
+$(APP_ELF): $(APP_OBJ)
+	@echo "Linking app.o -> app.elf"
+	@mkdir -p $(dir $@)
+	$(LD) $(APP_LDFLAGS) -o $@ $<
+
+APP_BIN := iso/boot/app.bin
+
+$(APP_BIN): $(APP_ELF)
+	@echo "Generating flat binary from ELF: $< -> $@"
+	$(OBJCOPY) -O binary $< $@
+
+
+.PHONY: all run build clean bootloader app

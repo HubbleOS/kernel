@@ -58,6 +58,16 @@ EFI_STATUS efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
         return status;
     }
 
+    // === [5.1] Відкриття app.elf ===
+    Print(L"[5.1] Opening app.elf\n");
+    EFI_FILE_HANDLE AppFile;
+    status = uefi_call_wrapper(RootFS->Open, 5, RootFS, &AppFile, L"boot\\app.elf", EFI_FILE_MODE_READ, 0);
+    if (EFI_ERROR(status))
+    {
+        Print(L"[5.1] app.elf not found: %r\n", status);
+        return status;
+    }
+
     // === [6] Читання ядра ===
     Print(L"[6] Reading kernel.bin into memory\n");
     void *kernel_addr = (void *)0x100000;
@@ -66,6 +76,17 @@ EFI_STATUS efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
     if (EFI_ERROR(status))
     {
         Print(L"[6] Kernel read error: %r\n", status);
+        return status;
+    }
+
+    // === [6.1] Читання app.elf ===
+    Print(L"[6.1] Reading app.elf into memory\n");
+    void *app_addr = (void *)0x200000;
+    UINTN app_size = 1024 * 1024;
+    status = uefi_call_wrapper(AppFile->Read, 3, AppFile, &app_size, app_addr);
+    if (EFI_ERROR(status))
+    {
+        Print(L"[6.1] App read error: %r\n", status);
         return status;
     }
 
@@ -84,6 +105,15 @@ EFI_STATUS efi_main(EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
     if (EFI_ERROR(status))
     {
         Print(L"[8] Close failed: %r\n", status);
+        return status;
+    }
+
+    // === [8.1] Закриття app.elf ===
+    Print(L"[8.1] Closing app.elf\n");
+    status = uefi_call_wrapper(AppFile->Close, 1, AppFile);
+    if (EFI_ERROR(status))
+    {
+        Print(L"[8.1] Close failed: %r\n", status);
         return status;
     }
 

@@ -1,5 +1,7 @@
-#include "stdbool.h"
 #include <stddef.h>
+#include <stdint.h>
+
+#include "stdbool.h"
 #include "utils/framebuffer.h"
 #include "utils/font.h"
 #include "utils/color.h"
@@ -332,6 +334,48 @@ void handle_change_y()
 	t_pos_y = atoi(input);
 }
 
+#define SYS_WRITE 1
+
+static long sys_write(int fd, const char *buf, size_t count)
+{
+	(void)fd;
+	for (size_t i = 0; i < count; ++i)
+		print_char(buf[i]);
+	return (long)count;
+}
+
+long syscall_handler(long num, long a1, long a2, long a3, long a4, long a5, long a6)
+{
+	(void)a4;
+	(void)a5;
+	(void)a6;
+	switch (num)
+	{
+	case SYS_WRITE:
+		return sys_write((int)a1, (const char *)a2, (size_t)a3);
+	default:
+		return -1;
+	}
+}
+
+static inline long syscall(long num, long a1, long a2, long a3, long a4, long a5, long a6)
+{
+	return syscall_handler(num, a1, a2, a3, a4, a5, a6);
+}
+
+typedef int (*app_entry_t)(void);
+
+void run_app(void *app_binary)
+{
+	app_entry_t app_main = (app_entry_t)app_binary;
+	// app_main();
+	int res = app_main();
+	if (res == 666)
+	{
+		print("C++ app\n", rgb(255, 150, 80));
+	}
+}
+
 int cli(framebuffer_info_t *fb)
 {
 	fbcli = fb;
@@ -342,7 +386,12 @@ int cli(framebuffer_info_t *fb)
 	while (1)
 	{
 		t_col = 0;
-		print("> ", COLOR_GREEN);
+
+		// print("> ", COLOR_GREEN);
+
+		syscall(SYS_WRITE, 1, (long)">", 1, 0, 0, 0);
+		void *app_binary = (void *)0x200000;
+		run_app(app_binary);
 
 		read_line(key_history[bufer_history], 100);
 
@@ -419,10 +468,7 @@ void print_char(char c)
 void print(const char *str)
 {
 	while (*str)
-	{
-		print_char(*str);
-		++str;
-	}
+		print_char(*str++);
 }
 
 void print_colored(const char *str, uint32_t color)
