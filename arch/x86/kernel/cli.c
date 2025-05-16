@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "utils/framebuffer.h"
 #include "utils/font.h"
+#include "utils/color.h"
 
 int bufer_history = 0;
 char key_history[128][128];
@@ -24,22 +25,12 @@ uint16_t t_width = 0;
 uint16_t t_height = 0;
 framebuffer_info_t *fbcli = 0;
 
-enum Color
-{
-	COLOR_BLACK = 0x0,
-	COLOR_RED = 0x4,
-	COLOR_GREEN = 0x32A852,
-	COLOR_YELLOW = 0x6,
-	COLOR_BLUE = 0x1,
-	COLOR_MAGENTA = 0x5,
-	COLOR_CYAN = 0x3,
-	COLOR_WHITE = 0xFFFFFF,
-	COLOR_LIGHT_GREY = 0x8,
-	COLOR_DEFAULT = 0x9
-};
+#define GET_MACRO(_1, _2, NAME, ...) NAME
+#define print(...) GET_MACRO(__VA_ARGS__, print_colored, print)(__VA_ARGS__)
 
 void print_char(char c);
 void print(const char *str);
+void print_colored(const char *str, color color);
 int strcmp(const char *s1, const char *s2);
 void print_hex(uint8_t value);
 uint8_t strlen(const char *str);
@@ -303,16 +294,14 @@ void handle_clear()
 
 void handle_neofetch()
 {
-	t_color_char = COLOR_GREEN;
 	print(
 		" _    _         _      _      _        \n"
 		"| |  | |       | |    | |    | |       \n"
 		"| |__| | _   _ | |__  | |__  | |  ___  \n"
 		"|  __  || | | || '_ \\ | '_ \\ | | / _ \\ \n"
 		"| |  | || |_| || |_) || |_) || ||  __/ \n"
-		"|_|  |_| \\__,_||_.__/ |_.__/ |_| \\___| \n");
-
-	t_color_char = COLOR_WHITE;
+		"|_|  |_| \\__,_||_.__/ |_.__/ |_| \\___| \n",
+		rgb(162, 96, 212));
 }
 
 void handle_help()
@@ -353,7 +342,9 @@ int cli(framebuffer_info_t *fb)
 	while (1)
 	{
 		t_col = 0;
+		t_color_char = COLOR_GREEN;
 		print("> ");
+		t_color_char = COLOR_WHITE;
 
 		read_line(key_history[bufer_history], 100);
 
@@ -432,6 +423,13 @@ void print(const char *str)
 		print_char(*str);
 		++str;
 	}
+}
+
+void print_colored(const char *str, uint32_t color)
+{
+	t_color_char = color;
+	print(str);
+	t_color_char = COLOR_WHITE;
 }
 
 int strcmp(const char *s1, const char *s2)
