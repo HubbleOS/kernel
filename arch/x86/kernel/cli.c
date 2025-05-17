@@ -1,8 +1,7 @@
-#include "framebuffer.h"
-#include "font.h"
+#include "cli.h"
 
 int bufer_history = 0;
-char key_history[128][128];
+char *key_history[50];
 uint8_t key_history_it[128];
 
 uint16_t t_colums = 80;
@@ -80,13 +79,14 @@ char scancode_to_ascii[128] = {
 #define KEY_LEFT 0x82
 #define KEY_RIGHT 0x83
 
-char read_ps2_key()
+int read_ps2_key()
 {
 	uint8_t scancode = 0;
 	bool is_extended = false;
 
 	while (1)
 	{
+
 		// Чекаємо, поки з'являться дані
 		while (!(inb(0x64) & 1))
 			;
@@ -135,46 +135,46 @@ void move_cursor(uint8_t row, uint8_t col)
 {
 	return;
 }
-void read_line(char *buf, int max_len)
+void read_line(char *buffer, int max_len)
 {
 	int buf_it = bufer_history;
 	int i = 0;
-	while (i < max_len)
+	while (i < max_len - 1)
 	{
-		char c = read_ps2_key();
-
+		int c = read_ps2_key();
+		print_hex((uint8_t)c);
 		if ((uint8_t)c == KEY_UP)
 		{
 			if (buf_it == 0)
 				continue;
-			t_col = 3;
+			buf_it--;
 			i = 0;
-			for (int i = 0; i < strlen(buf); i++)
-				print(" ");
-			for (int j = 0; j < strlen(key_history[buf_it - 1]); j++)
-			{
-				buf[j] = key_history[buf_it - 1][j];
-				i++;
-			}
 			t_col = 3;
-			print(key_history[--buf_it]);
+			for (int j = 0; j < strlen(key_history[buf_it]); j++)
+			{
+				buffer[i++] = key_history[buf_it][j];
+			}
+			buffer[i] = '\0';
+			t_col = 3;
+			print(buffer);
 			continue;
-		};
+		}
+
 		if ((uint8_t)c == KEY_DOWN)
 		{
-			if (buf_it == bufer_history)
+			if (buf_it == bufer_history - 1)
 				continue;
-			t_col = 3;
+
+			buf_it++;
 			i = 0;
-			for (int i = 0; i < strlen(buf); i++)
-				print(" ");
-			for (int j = 0; j < strlen(key_history[buf_it + 1]); j++)
-			{
-				buf[j] = key_history[buf_it + 1][j];
-				i++;
-			}
 			t_col = 3;
-			print(key_history[++buf_it]);
+			for (int j = 0; j < strlen(key_history[buf_it]); j++)
+			{
+				buffer[i++] = key_history[buf_it][j];
+			}
+			buffer[i] = '\0';
+			t_col = 3;
+			print(buffer);
 			continue;
 		}
 
@@ -190,16 +190,25 @@ void read_line(char *buf, int max_len)
 			continue;
 		}
 
-		if (c == '\r' || c == '\n')
+		if (c == '\r' || c == '\n' || (uint32_t)c == 0x1C)
 		{
+			print("u");
 			t_col = 0;
 			t_row++;
+			print("u");
 			break;
 		}
-		buf[i++] = c;
-		print_char(buf[i - 1]);
+
+		if (c != '\n')
+		{
+			buffer[i++] = c;
+
+			print_char(c);
+		}
 	}
-	buf[i] = '\0';
+	print("b");
+	buffer[i] = '\0';
+	print("b");
 }
 
 void clear(void)
@@ -222,72 +231,95 @@ int atoi(const char *str)
 	return result;
 }
 
-int cli(framebuffer_info_t *fb)
+void cli(framebuffer_info_t *fb)
 {
+	uint32_t *pixels = (uint32_t *)fb->base;
+	// for (int i = 0; i < (fb->pitch / 4) * fb->height; ++i)
+	// {
+	// 	pixels[i] = 0x000000;
+	// }
 	fbcli = fb;
+	print_hex(fb->heap_start);
+	print_hex(fb->heap_size);
 
-	clear();
+	for (int i = 0; i < 20; i++)
+	{
+		print("u");
+		key_history[i] = kmalloc(100);
+		print("u");
+		if (key_history[0] == NULL)
+		{
+			print("Error");
+			while (1)
+				;
+		}
+	};
 
+	// for (int i = 0; i < (fb->pitch / 4) * fb->height; ++i)
+	// {
+	// 	pixels[i] = 0x000000;
+	// }
+
+	// clear();
 	neofetch();
+
+	char buffer[100]; // виділений поза read_line буфер
 
 	while (1)
 	{
 		print("> ");
-		char buffer[100];
-		read_line(key_history[bufer_history++], 100);
+		read_line(buffer, sizeof(buffer));
 
-		if (key_history[bufer_history - 1][0] == '\0')
+		// Якщо порожня команда — пропустити
+		if (buffer[0] == '\0')
 		{
-			--bufer_history;
 			print("\n");
 			continue;
 		}
 
-		if (strcmp(key_history[bufer_history - 1], "exit") == 0)
+		// Запис у історію, якщо є місце
+		if (bufer_history < 20)
+		{
+			uint8_t len = strlen(buffer);
+			if (len >= 100)
+				len = 99;
+			for (int i = 0; i < len; i++)
+				key_history[bufer_history][i] = buffer[i];
+			key_history[bufer_history][len] = '\0';
+			bufer_history++;
+		}
+
+		// Команди
+		if (strcmp(buffer, "exit") == 0)
 		{
 			print("\nGoodbye!\n");
 			break;
 		}
-		else if (strcmp(key_history[bufer_history - 1], "hello") == 0)
+		else if (strcmp(buffer, "hello") == 0)
 		{
 			print("\nHello!\n");
 		}
-		else if (strcmp(key_history[bufer_history - 1], "neofetch") == 0)
+		else if (strcmp(buffer, "neofetch") == 0)
 		{
 			neofetch();
 		}
-		else if (strcmp(key_history[bufer_history - 1], "clear") == 0)
+		else if (strcmp(buffer, "clear") == 0)
 		{
 			clear();
 		}
-		else if (strcmp(key_history[bufer_history - 1], "change-y") == 0)
+		else if (strcmp(buffer, "change-y") == 0)
 		{
-			read_line(key_history[bufer_history - 1], 100);
+			print("Enter new Y position: ");
+			read_line(buffer, sizeof(buffer));
 			t_pos_y = atoi(buffer);
-		}
-		else if (strcmp(key_history[bufer_history - 1], "change-x") == 0)
-		{
-			read_line(key_history[bufer_history - 1], 100);
-			t_pos_x = atoi(buffer);
-		}
-		else if (strcmp(key_history[bufer_history - 1], "help") == 0)
-		{
-			print("\n");
-			print("exit\n");
-			print("hello\n");
-			print("neofetch\n");
-			print("clear\n");
-			print("help\n");
-			print("change-x\n");
-			print("change-y\n");
 		}
 		else
 		{
-			print("\nUnknown command!\n");
+			print("Unknown command: ");
+			print(buffer);
+			print("\n");
 		}
 	}
-
-	return 0;
 }
 void print_hex(uint8_t value)
 {
@@ -300,7 +332,7 @@ void print_hex(uint8_t value)
 	buf[3] = hex_digits[value & 0x0F];
 	buf[4] = '\0';
 
-	print(buf); // твоя функція print(const char*)
+	print(buf);
 }
 void print_char(char c)
 {
