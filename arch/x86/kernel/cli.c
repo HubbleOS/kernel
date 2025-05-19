@@ -376,12 +376,31 @@ void run_app(void *app_binary)
 	}
 }
 
+void draw_circle(int x, int y, int r, uint32_t color)
+{
+	uint32_t *pixels = (uint32_t *)fbcli->base;
+	for (size_t i = 0; i < fbcli->width; ++i)
+	{
+		for (size_t j = 0; j < fbcli->height; ++j)
+		{
+			int dx = i - x;
+			int dy = j - y;
+			if (dx * dx + dy * dy <= r * r)
+			{
+				pixels[i + j * fbcli->pitch / 4] = color;
+			}
+		}
+	}
+}
+
 int cli(framebuffer_info_t *fb)
 {
 	fbcli = fb;
 
 	handle_clear();
 	handle_neofetch();
+
+	// draw_circle(100, 100, 10, 0xff0000);
 
 	while (1)
 	{
