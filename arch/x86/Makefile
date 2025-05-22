@@ -6,8 +6,6 @@ AS = $(CROSS)as
 CC = $(CROSS)gcc
 LD = $(CROSS)ld
 OBJCOPY = $(CROSS)objcopy
-# HOST_GCC = gcc
-# HOST_LD = ld
 HOST_OBJCOPY = objcopy
 
 # Flags
@@ -26,7 +24,8 @@ BUILD_DIR ?= build
 
 # Output ELF and ISO
 OUTPUT := $(BUILD_DIR)/kernel.elf
-ISO := iso/kernel.bin
+ISO_DIR ?= iso
+ISO := $(ISO_DIR)/kernel.bin
 
 # Kernel object files
 SRC_FILES := $(shell find $(SRC_DIRS) -type f -name "*.c")
@@ -40,17 +39,20 @@ BOOT_SRC := boot
 BOOT_SRCS := $(shell find $(BOOT_SRC) -type f -name "*.c")
 BOOT_OBJ := $(patsubst %.c,$(BUILD_DIR)/%.o,$(BOOT_SRCS))
 BOOT_SO  := $(BUILD_DIR)/boot/boot.so
-EFI_OUT  := iso/EFI/BOOT/BOOTx64.EFI
+EFI_OUT  := $(ISO_DIR)/EFI/BOOT/BOOTx64.EFI
+EFI_OUT_DIR := $(ISO_DIR)/EFI/BOOT
 
 BOOT_CFLAGS := -Iinclude -Ignu-efi/inc -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args -c
 BOOT_LDFLAGS := -shared -Bsymbolic -Lgnu-efi/x86_64/lib -Lgnu-efi/x86_64/gnuefi -Tgnu-efi/gnuefi/elf_x86_64_efi.lds
 BOOT_LIBS := -lgnuefi -lefi
 EFI_SECTIONS := -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc
 
+.PHONY: all run build bootloader qemu
+
 # Default target
 all: run
 
-run: $(OUTPUT) $(ISO) bootloader app
+run: $(OUTPUT) $(ISO) bootloader
 	@echo "Build successful."
 
 # Kernel object files
@@ -68,6 +70,7 @@ $(OUTPUT): $(OBJ_FILES)
 
 # Kernel binary
 $(ISO): $(OUTPUT)
+	@mkdir -p $(dir $@)
 	$(OBJCOPY) -O $(OBJCPYFLAGS) $< $@
 
 # Bootloader
@@ -87,42 +90,6 @@ $(BOOT_SO): $(BOOT_OBJ)
 
 # Create EFI binary
 $(EFI_OUT): $(BOOT_SO)
-	@mkdir -p $(dir $@)
+	@mkdir -p $(EFI_OUT_DIR)
 	$(HOST_OBJCOPY) $(EFI_SECTIONS) --target=efi-app-x86_64 --subsystem=10 $< $@
 
-# Clean
-clean:
-	@echo "Cleaning..."
-	@rm -rf $(BUILD_DIR) $(EFI_OUT)
-
-
-
-# ==== App Build (C++) ====
-CXX = $(CROSS)g++
-
-APP_SRC := apps/app.cpp
-APP_OBJ := build/apps/app.o
-APP_ELF := iso/boot/app.elf
-APP_CFLAGS := -ffreestanding -nostdlib -O2 -Wall -Wextra
-APP_LDFLAGS := -nostdlib -T apps/app_linker.ld
-
-app: $(APP_ELF) $(APP_BIN)
-
-$(APP_OBJ): $(APP_SRC)
-	@echo "Compiling app.cpp to object: $<"
-	@mkdir -p $(dir $@)
-	$(CXX) $(APP_CFLAGS) $(INCLUDES) $(LIBS) -c $< -o $@
-
-$(APP_ELF): $(APP_OBJ)
-	@echo "Linking app.o -> app.elf"
-	@mkdir -p $(dir $@)
-	$(LD) $(APP_LDFLAGS) -o $@ $<
-
-APP_BIN := iso/boot/app.bin
-
-$(APP_BIN): $(APP_ELF)
-	@echo "Generating flat binary from ELF: $< -> $@"
-	$(OBJCOPY) -O binary $< $@
-
-
-.PHONY: all run build clean bootloader app
