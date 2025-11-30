@@ -21,7 +21,6 @@ _Begin_C_Header
 	bool is_dir;
 	uint32_t size;
 	uint32_t mode;
-	uint32_t pos;
 
 	void *fs_node;	   // внутрішній вказівник драйвера (наприклад FAT32_DirectoryEntry*)
 	struct VFS_FS *fs; // яка ФС обслуговує
@@ -48,8 +47,8 @@ typedef struct VFS_FS
 	int (*read)(VFS_File *file, void *buf, uint32_t size);
 	int (*write)(VFS_File *file, const void *buf, uint32_t size);
 
-	bool (*mkdir)(struct VFS_FS *fs, const char *path);
-	bool (*unlink)(struct VFS_FS *fs, const char *path);
+	uint8_t (*mkdir)(struct VFS_FS *fs, const char *path);
+	uint8_t (*unlink)(struct VFS_FS *fs, const char *path);
 
 	int (*close)(VFS_File *file);
 	Directory (*readdir)(struct VFS_FS *fs, const char *path);

@@ -179,6 +179,8 @@ typedef struct
 
 	Ext2GroupDesc *groups;
 	Ext2Inode *inodes;
+
+	Ext2Superblock *superblock;
 } EXT2_FS;
 
 #define MAX_PARTS 16
@@ -192,3 +194,11 @@ typedef struct
 	int count;
 	PathPart_ext parts[MAX_PARTS];
 } PathParts_ext;
+
+typedef struct
+{
+	uint32_t inode;
+	uint32_t parent_inode;
+	uint32_t offset;
+	uint32_t size;
+} Ext2File;

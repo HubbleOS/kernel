@@ -119,10 +119,17 @@ VFS_File *vfs_open(const char *path, int flags)
 		relpath++;
 	printk("VFS: opening file %s\n", relpath);
 	VFS_Node *node = mnt->fs->open(mnt->fs, relpath);
-	if (!node && (flags & VFS_O_CREAT))
+	if (IS_ERR(node) && (flags & VFS_O_CREAT))
+	{
+		printk("<7>VFS: creating file %s, error %d\n", relpath, PTR_ERR(node));
 		node = mnt->fs->create_file(mnt->fs, relpath);
-	if (!node)
+	}
+	if (IS_ERR(node))
+	{
+		printk("<0>VFS: failed to open file %s\n", relpath);
 		return ERR_PTR(-ENOENT);
+	}
+	printk("VFS: opened file %s\n", relpath);
 
 	VFS_File *f = kmalloc(sizeof(VFS_File));
 	f->node = node;
@@ -230,15 +237,21 @@ int vfs_lseek(VFS_File *file, int offset, int whence)
 }
 int vfs_close(VFS_File **pfile)
 {
+	if (!pfile || !*pfile)
+		return -EINVAL;
+
 	VFS_File *file = *pfile;
-	if (!file || !file->node->fs || !file->node->fs->close)
-		return -EIO;
-	file->node->fs->close(file);
-	// *pfile = NULL;
-	if (file)
+
+	if (!file->node || !file->node->fs || !file->node->fs->close)
 	{
-		// printk("%s\n", file->node->name);
-		printk("VFS: file was not closed in vfs %s\n", file->node->name);
+		printk("VFS: failed to close file\n");
+		return -EIO;
 	}
+
+	file->node->fs->close(file);
+
+	*pfile = NULL;
+	kfree(file);
+
 	return 0;
 }

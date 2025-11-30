@@ -82,10 +82,6 @@ void kernel_main(BootInfo *bi)
 
 	char buffer[1024];
 
-	// struct pci_device *nvme = find_nvme_qemu();
-	// printk("NVMe bus: %d", nvme->bus);
-	// printk("NVMe init\n");
-
 	printk("GPT init\n");
 	gpt_init(partitions);
 	if (!partitions[1].device->read)
@@ -97,44 +93,39 @@ void kernel_main(BootInfo *bi)
 	printk("FAT32 init at LBA %d\n", partitions[0].first_lba);
 	vfs_mount("/", &partitions[0], FS_FAT32);
 
-	// printk("FAT32 mounted\n");
-	// printk("root cluster: %d\n", ((FAT32_FS *)(root_fs->fs))->root_cluster);
-	// vfs_create_file("/tesit.txt");
-	// Directory dir = vfs_readdir("/");
-
-	// for (int i = 0; i < dir.count; i++)
-	// {
-	// 	printk("%s %d\n", dir.entries[i].name, dir.entries[i].is_dir);
-	// }
-	// dir.free_entries(&dir);
-	// printk("EXT2 init\n");
-
 	// vfs_mount("/mnt/ext2", &partitions[1], FS_EXT2);
+	// // vfs_unlink("/mnt/ext2/testl.txt");
+	// VFS_File *f = vfs_open("/mnt/ext2/testl.txt", VFS_O_RDWR | VFS_O_CREAT);
+	// vfs_read(f, buffer, 1024);
 	// Directory dir = vfs_readdir("/mnt/ext2");
 	// printk("trying %d count", dir.count);
 	// for (int i = 0; i < dir.count; i++)
 	// {
 	// 	printk("%s %d\n", dir.entries[i].name, dir.entries[i].is_dir);
 	// }
-	// VFS_File *f = vfs_open("/tesiit.txt", VFS_O_RDONLY);
-	// vfs_write(f, "Hello wo123", 11);
 	// vfs_lseek(f, 0, SEEK_SET);
-	// printk("Reading file: ");
+	// vfs_write(f, "Hello world", 11);
+	// vfs_write(f, "Hello world", 11);
+
+	// vfs_lseek(f, 0, SEEK_SET);
 	// vfs_read(f, buffer, 1024);
 	// printk("File content: ");
 	// printk("%s\n", buffer);
-	// vfs_lseek(f, 0, SEEK_SET);
 	// vfs_close(&f);
-	// if (f == NULL)
-	// {
-	// 	printk("VFS: file was not closed kmain%s\n", f->node->name);
-	// }
-	// vfs_read(f, buffer, 1024);
-	// printk("FAT32 init done\n");
 
-	// ext2_init(partitions[1]);
+	// // vfs_close(&f);
+	// // VFS_File *f = vfs_open("/tesiit.txt", VFS_O_RDONLY | VFS_O_CREAT);
+	// // vfs_write(f, "Hello wo123", 11);
+	// // vfs_lseek(f, 0, SEEK_SET);
+	// // printk("Reading file: ");
+	// // vfs_read(f, buffer, 1024);
+	// // printk("File content: ");
+	// // printk("%s\n", buffer);
+	// // vfs_lseek(f, 0, SEEK_SET);
+	// // vfs_read(f, buffer, 1024);
+	// // printk("FAT32 init done\n");
 
-	os_main(bi);
+	// os_main(bi);
 
 	while (1)
 		;
