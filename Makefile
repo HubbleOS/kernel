@@ -94,6 +94,7 @@ INCLUDES += -I$(abspath .)
 INCLUDES += -I$(abspath include)
 INCLUDES += -I$(ARCH_DIR)/include
 INCLUDES += -I$(ARCH_DIR)/kernel
+INCLUDES += -I$(ARCH_DIR)/boot/limine
 export INCLUDES
 
 # ---------------------------------------------------------------------------
@@ -106,14 +107,6 @@ export LIB_DIR
 LOG_DIR  := $(OUT_DIR)/logs/$(shell date +%Y-%m-%d)
 LOG_FILE := $(LOG_DIR)/$(shell date +%H-%M-%S).log
 export LOG_DIR LOG_FILE
-
-ISO_DIR := $(BUILD_DIR)/iso
-export ISO_DIR
-
-ifeq ($(ARCH),x86)
-	EFI_NAME := BOOTx64.EFI
-	EFI_TARGET := efi-app-x86_64
-endif
 
 ifeq ($(ARCH),arm64)
 	EFI_NAME := BOOTAA64.EFI
@@ -312,19 +305,13 @@ endef
 
 subdirs :=
 $(eval $(call kbuild-subdir,arch/$(ARCH)))
-$(eval $(call kbuild-subdir,tools/dev))
 
 # ---------------------------------------------------------------------------
-# Userland build
+# Default target: build the kernel
 # ---------------------------------------------------------------------------
 
-USR_DIR := $(abspath usr)
-export USR_DIR
-
-USR_BUILD :=
-ifneq ($(ARCH),arm64)
-  USR_BUILD := $(MAKE) -C $(USR_DIR) -j$(JOBS) BUILD_TOOL_FLAGS="--log-file $(OUT_DIR)/logs/usr_build.log -v --jobs $(JOBS)"
-endif
+PHONY += all
+all: build
 
 # ---------------------------------------------------------------------------
 # Targets
@@ -369,6 +356,10 @@ format-check:
 		-not -path "*/build/*" \
 		| xargs -r clang-format -style=file --dry-run --Werror
 
+# ---------------------------------------------------------------------------
+# Build kernel + userland (no ISO yet)
+# ---------------------------------------------------------------------------
+
 PHONY += build
 build: build-tool rust
 	@mkdir -p $(LOG_DIR)
@@ -376,26 +367,7 @@ build: build-tool rust
 	$(Q)set -e; for dir in $(filter-out arch/$(ARCH)/kernel,$(subdirs)); do \
 		$(MAKE) -C $$dir; \
 	done
-	$(USR_BUILD)
 	@echo "Build complete"
-
-PHONY += run
-run: build
-	$(MAKE) -C arch/$(ARCH)/boot
-	@python3 tools/dev/qemu/main.py
-
-PHONY += disk
-disk:
-	@mkdir -p out/disks
-	@python3 tools/dev/disk/main.py
-
-PHONY += flash
-flash:
-	@python3 tools/dev/flash/main.py
-
-PHONY += demo
-demo:
-	@$(MAKE) -C tools/dev/demo run
 
 PHONY += clean
 clean:
